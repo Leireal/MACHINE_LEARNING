@@ -134,6 +134,38 @@ for i in range(len(df)):
     # Esperar antes de la siguiente iteración
     time.sleep(delay)
 '''
+
+import pandas as pd
+import pickle
+from sklearn.metrics import classification_report, confusion_matrix
+import streamlit as st
+import pandas as pd
+import time
+import altair as alt
+
+# Cargar nuevo dataset
+df = pd.read_csv("../data/processed/datos_treal.csv")
+
+
+# Preprocesamiento: eliminar columnas no usadas por el modelo
+# Ajusta según tus columnas, por ejemplo:
+X_nuevo = df.drop(columns=["id","cycle"], errors='ignore')
+
+# Cargar modelo
+with open("../models/modelo_RandomForest.pkl", "rb") as f:
+   
+    rf = pickle.load(f)
+
+# Predecir etiquetas con el modelo cargado
+predicciones = rf.predict(X_nuevo)
+
+# Agregar predicciones al dataframe
+df["pred_label2"] = predicciones
+
+print(df.head())
+
+#-------------------------------------------------------------------------------------------
+
 import streamlit as st
 import pandas as pd
 import time
@@ -141,39 +173,39 @@ import altair as alt
 
 st.set_page_config(layout="wide")
 st.title("📊 RECOMENDACIÓN DE MANTENIMIENTO PREDICTIVO")
-
+'''
 @st.cache_data
 def load_data():
-    return pd.read_csv("datos_ver.csv", delimiter=",")
-
+    #return pd.read_csv("datos_ver.csv", delimiter=",")
+    
 df = load_data()
-
-# Descripciones solo en español
-DESCRIP_ES = {
-    "s4": "Temperatura salida turbina baja presión",
-    "s11": "Presión estática salida compresor alta presión",
-    "s20": "Flujo de refrigerante turbina alta presión"
-}
-
-import streamlit as st
-import pandas as pd
-import time
-import altair as alt
-
-st.set_page_config(layout="wide")
-st.title("📊 RECOMENDACIÓN DE MANTENIMIENTO PREDICTIVO")
-
+'''
 @st.cache_data
-def load_data():
-    return pd.read_csv("datos_ver.csv", delimiter=",")
-
-df = load_data()
+def load_and_predict():
+    df = pd.read_csv("../data/processed/datos_treal.csv")
+    X_nuevo = df.drop(columns=["id", "cycle"], errors='ignore')
+    
 
 # Descripciones en español
 DESCRIP_ES = {
+    "id": "ID del motor",
+    "cycle": "Ciclo de operación",
+    "s2": "Temperatura salida compresor baja presión",
+    "s3": "Temperatura salida compresor alta presión",
     "s4": "Temperatura salida turbina baja presión",
+    "s7": "Presión salida compresor alta presión",
+    "s8": "Velocidad física del ventilador",
     "s11": "Presión estática salida compresor alta presión",
-    "s20": "Flujo de refrigerante turbina alta presión"
+    "s12": "Flujo de combustible relativo a Ps30",
+    "s13": "Velocidad corregida del ventilador",
+    "s14": "Velocidad corregida del núcleo",
+    "s15": "Relación de bypass",
+    "s17": "Entalpía del sangrado",
+    "s20": "Flujo de refrigerante turbina alta presión",
+    "s21": "Flujo de refrigerante turbina baja presión",
+    "RUL": "Vida útil restante",
+    "label1": "Etiqueta OK o fallo inminente",
+    "label2": "Etiqueta OK, Moderado o Crítico"
 }
 
 # Estados según label2
@@ -196,9 +228,9 @@ if sel:
         st.sidebar.markdown(f"**{v}** — {desc}")
 
 # Métricas (solo Moderado y Crítico)
-col_mod, col_cri = st.columns(2)
-m_mod = col_mod.metric("Moderado", "0")
-m_cri = col_cri.metric("Crítico", "0")
+#col_mod, col_cri = st.columns(2)
+#m_mod = col_mod.metric("Moderado", "0")
+#m_cri = col_cri.metric("Crítico", "0")
 
 # Placeholders
 header = st.empty()
@@ -215,10 +247,10 @@ for i in range(len(df)):
     # Actualizar métricas
     if label == 1:
         c_mod += 1
-        m_mod.metric("Moderado", str(c_mod))
+        #m_mod.metric("Moderado", str(c_mod))
     elif label == 2:
         c_cri += 1
-        m_cri.metric("Crítico", str(c_cri))
+        #m_cri.metric("Crítico", str(c_cri))
 
     # Mensaje en cabecera
     header.markdown(f"<h2 style='text-align:center'>{estado} — {desc}</h2>", unsafe_allow_html=True)
