@@ -73,7 +73,7 @@ ESTADOS = {
 # -----------------------------
 # Sidebar de configuración
 # -----------------------------
-sel = st.sidebar.multiselect("Variables a graficar", df.columns.tolist(), default=["s4", "s11", "s20"])
+sel = st.sidebar.multiselect("Variables a graficar", df.columns.tolist(), default=["s4", "s11", "s20", "pred_label2"])
 window = st.sidebar.slider("Ventana (valores X)", 10, 500, 100, step=10)
 delay = st.sidebar.slider("Delay entre pasos (seg)", 0.0, 1.0, 0.2, step=0.05)
 
